@@ -6,7 +6,7 @@
     "priceNZD": 45,
     "priceAUD": 40,
     "image": "images/products/vcr-tee.jpg",
-    "active": false
+    "active": true
   },
   {
     "id": "vcr-hoodie-black",
