@@ -21,8 +21,12 @@
     card.className = 'product-card';
     card.setAttribute('data-product-id', product.id);
 
+    var imageHtml = product.image
+      ? '<img src="' + product.image + '" alt="' + product.name + '">'
+      : '<div class="product-image-placeholder"></div>';
+
     card.innerHTML =
-      '<img src="' + product.image + '" alt="' + product.name + '">' +
+      imageHtml +
       '<div class="card-body">' +
       '<div class="product-name">' + product.name + '</div>' +
       '<div class="product-description">' + product.description + '</div>' +

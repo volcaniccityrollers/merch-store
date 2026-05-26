@@ -173,7 +173,8 @@ body.cart-open {
   flex-direction: column;
 }
 
-.product-card img {
+.product-card img,
+.product-image-placeholder {
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;

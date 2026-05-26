@@ -98,10 +98,12 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
     var row = document.createElement('div');
     row.className = 'cart-item';
 
-    var img = document.createElement('img');
-    img.src = item.image;
-    img.alt = item.name;
-    row.appendChild(img);
+    if (item.image) {
+      var img = document.createElement('img');
+      img.src = item.image;
+      img.alt = item.name;
+      row.appendChild(img);
+    }
 
     var details = document.createElement('div');
     details.className = 'cart-item-details';
