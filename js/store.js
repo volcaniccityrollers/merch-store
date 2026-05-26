@@ -49,12 +49,14 @@
     return card;
   }
 
+  var API_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.net/merch-checkout';
+
   function loadStore() {
-    fetch('config.json?t=' + Date.now())
+    fetch(API_URL + '/config')
       .then(function (res) { return res.json(); })
       .then(function (config) {
         storeCurrency = config.currency || 'NZD';
-        return fetch('products.json?t=' + Date.now());
+        return fetch(API_URL + '/products');
       })
       .then(function (res) { return res.json(); })
       .then(function (products) {

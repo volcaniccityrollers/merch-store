@@ -70,7 +70,7 @@ function showAdminPanel() {
 // Currency toggle
 async function loadConfig() {
   try {
-    const res = await fetch('config.json?t=' + Date.now());
+    const res = await fetch(ADMIN_URL + '/config');
     const config = await res.json();
     updateCurrencyUI(config.currency || 'NZD');
   } catch (err) {
@@ -121,7 +121,7 @@ async function loadProducts() {
   productListContainer.appendChild(loadingEl);
 
   try {
-    const res = await fetch('products.json?t=' + Date.now());
+    const res = await fetch(ADMIN_URL + '/products');
     if (!res.ok) throw new Error('Failed to fetch products');
     const products = await res.json();
     renderProducts(products);
