@@ -164,6 +164,20 @@ body.cart-open {
   }
 }
 
+.store-loading,
+.store-empty,
+.store-error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.store-error {
+  color: var(--primary);
+}
+
 /* ===== Product Card ===== */
 .product-card {
   background: var(--card-bg);

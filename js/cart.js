@@ -199,19 +199,25 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
     totalEl.textContent = '$' + getTotal().toFixed(2) + ' ' + currency;
   }
 
+  var savedScrollY = 0;
+
   function toggleDrawer(open) {
     var drawer = document.getElementById('cart-drawer');
     var overlay = document.getElementById('cart-overlay');
     if (!drawer || !overlay) return;
 
     if (open) {
+      savedScrollY = window.scrollY;
+      document.body.style.top = '-' + savedScrollY + 'px';
+      document.body.classList.add('cart-open');
       drawer.classList.add('open');
       overlay.classList.add('open');
-      document.body.classList.add('cart-open');
     } else {
       drawer.classList.remove('open');
       overlay.classList.remove('open');
       document.body.classList.remove('cart-open');
+      document.body.style.top = '';
+      window.scrollTo(0, savedScrollY);
     }
   }
 
@@ -226,10 +232,15 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: cart, currency: currency })
     })
-      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        if (!res.ok) throw new Error('Checkout failed');
+        return res.json();
+      })
       .then(function (data) {
         if (data.url) {
           window.location.href = data.url;
+        } else {
+          throw new Error('No checkout URL');
         }
       })
       .catch(function () {

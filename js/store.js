@@ -73,6 +73,14 @@
   var API_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.net/merch-checkout';
 
   function loadStore() {
+    var grid = document.getElementById('product-grid');
+    if (!grid) return;
+
+    var loading = document.createElement('div');
+    loading.className = 'store-loading';
+    loading.textContent = 'Loading merch...';
+    grid.appendChild(loading);
+
     fetch(API_URL + '/config')
       .then(function (res) { return res.json(); })
       .then(function (config) {
@@ -81,17 +89,27 @@
       })
       .then(function (res) { return res.json(); })
       .then(function (products) {
-        var grid = document.getElementById('product-grid');
-        if (!grid) return;
+        grid.removeChild(loading);
 
-        products
-          .filter(function (p) { return p.active; })
-          .forEach(function (product) {
-            grid.appendChild(renderProductCard(product));
-          });
+        var active = products.filter(function (p) { return p.active; });
+        if (active.length === 0) {
+          var empty = document.createElement('div');
+          empty.className = 'store-empty';
+          empty.textContent = 'No products available right now.';
+          grid.appendChild(empty);
+          return;
+        }
+
+        active.forEach(function (product) {
+          grid.appendChild(renderProductCard(product));
+        });
       })
-      .catch(function (err) {
-        console.error('Failed to load store:', err);
+      .catch(function () {
+        grid.removeChild(loading);
+        var error = document.createElement('div');
+        error.className = 'store-error';
+        error.textContent = 'Failed to load products. Please refresh.';
+        grid.appendChild(error);
       });
   }
 
