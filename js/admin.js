@@ -1,6 +1,5 @@
 const ADMIN_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.net/merch-checkout';
 
-// DOM elements
 const passcodeGate = document.getElementById('passcodeGate');
 const passcodeForm = document.getElementById('passcodeForm');
 const passcodeInput = document.getElementById('passcodeInput');
@@ -11,8 +10,10 @@ const addProductForm = document.getElementById('addProductForm');
 const addProductBtn = document.getElementById('addProductBtn');
 const addProductError = document.getElementById('addProductError');
 const addProductSuccess = document.getElementById('addProductSuccess');
+const btnNZD = document.getElementById('btnNZD');
+const btnAUD = document.getElementById('btnAUD');
+const currencyStatus = document.getElementById('currencyStatus');
 
-// Check if already authenticated
 function init() {
   const stored = sessionStorage.getItem('adminPasscode');
   if (stored) {
@@ -20,7 +21,6 @@ function init() {
   }
 }
 
-// Passcode submission
 passcodeForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   passcodeError.style.display = 'none';
@@ -50,7 +50,53 @@ passcodeForm.addEventListener('submit', async (e) => {
 function showAdminPanel() {
   passcodeGate.style.display = 'none';
   adminPanel.style.display = 'block';
+  loadConfig();
   loadProducts();
+}
+
+// Currency toggle
+async function loadConfig() {
+  try {
+    const res = await fetch('config.json?t=' + Date.now());
+    const config = await res.json();
+    updateCurrencyUI(config.currency || 'NZD');
+  } catch (err) {
+    updateCurrencyUI('NZD');
+  }
+}
+
+function updateCurrencyUI(currency) {
+  btnNZD.classList.toggle('active', currency === 'NZD');
+  btnAUD.classList.toggle('active', currency === 'AUD');
+  currencyStatus.textContent = 'Store is showing ' + currency + ' prices';
+}
+
+btnNZD.addEventListener('click', () => setCurrency('NZD'));
+btnAUD.addEventListener('click', () => setCurrency('AUD'));
+
+async function setCurrency(currency) {
+  const passcode = sessionStorage.getItem('adminPasscode');
+  btnNZD.disabled = true;
+  btnAUD.disabled = true;
+
+  try {
+    const res = await fetch(ADMIN_URL + '/config', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Passcode': passcode
+      },
+      body: JSON.stringify({ currency })
+    });
+
+    if (!res.ok) throw new Error('Failed to update currency');
+    updateCurrencyUI(currency);
+  } catch (err) {
+    alert('Error updating currency: ' + err.message);
+  } finally {
+    btnNZD.disabled = false;
+    btnAUD.disabled = false;
+  }
 }
 
 // Load and render products
@@ -89,10 +135,12 @@ function renderProducts(products) {
     const item = document.createElement('div');
     item.className = 'product-item';
 
-    const img = document.createElement('img');
-    img.src = product.image;
-    img.alt = product.name;
-    item.appendChild(img);
+    if (product.image) {
+      const img = document.createElement('img');
+      img.src = product.image;
+      img.alt = product.name;
+      item.appendChild(img);
+    }
 
     const info = document.createElement('div');
     info.className = 'product-info';
@@ -104,7 +152,7 @@ function renderProducts(products) {
 
     const priceEl = document.createElement('div');
     priceEl.className = 'price';
-    priceEl.textContent = '$' + Number(product.price).toFixed(2);
+    priceEl.textContent = '$' + Number(product.priceNZD).toFixed(2) + ' NZD / $' + Number(product.priceAUD).toFixed(2) + ' AUD';
     info.appendChild(priceEl);
 
     item.appendChild(info);
@@ -160,16 +208,17 @@ addProductForm.addEventListener('submit', async (e) => {
   addProductSuccess.textContent = '';
 
   const name = document.getElementById('productName').value.trim();
-  const price = parseFloat(document.getElementById('productPrice').value);
+  const priceNZD = parseFloat(document.getElementById('productPriceNZD').value);
+  const priceAUD = parseFloat(document.getElementById('productPriceAUD').value);
   const description = document.getElementById('productDescription').value.trim();
   const image = document.getElementById('productImage').value.trim();
 
-  if (!name || isNaN(price) || !description || !image) {
+  if (!name || isNaN(priceNZD) || isNaN(priceAUD) || !description) {
     addProductError.textContent = 'Please fill in all required fields.';
     return;
   }
 
-  const productData = { name, price, description, image, active: true };
+  const productData = { name, priceNZD, priceAUD, description, image: image || '', active: true };
 
   const passcode = sessionStorage.getItem('adminPasscode');
   addProductBtn.disabled = true;
@@ -201,5 +250,4 @@ addProductForm.addEventListener('submit', async (e) => {
   }
 });
 
-// Initialize
 init();

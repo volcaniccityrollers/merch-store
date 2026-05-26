@@ -4,6 +4,15 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
   'use strict';
 
   var STORAGE_KEY = 'vcr_cart';
+  var CURRENCY_KEY = 'vcr_currency';
+
+  function getCurrency() {
+    return localStorage.getItem(CURRENCY_KEY) || 'NZD';
+  }
+
+  function setCurrency(currency) {
+    localStorage.setItem(CURRENCY_KEY, currency);
+  }
 
   function getCart() {
     try {
@@ -19,7 +28,18 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
     renderCartDrawer();
   }
 
-  function addItem(product) {
+  function addItem(product, currency) {
+    // If currency changed, clear cart
+    var currentCurrency = getCurrency();
+    if (currency && currency !== currentCurrency) {
+      localStorage.removeItem(STORAGE_KEY);
+      setCurrency(currency);
+    } else if (currency) {
+      setCurrency(currency);
+    }
+
+    var price = currency === 'AUD' ? product.priceAUD : product.priceNZD;
+
     var cart = getCart();
     var existing = cart.find(function (item) {
       return item.id === product.id;
@@ -31,7 +51,7 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
       cart.push({
         id: product.id,
         name: product.name,
-        price: product.price,
+        price: price,
         quantity: 1,
         image: product.image
       });
@@ -95,6 +115,7 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
   }
 
   function createCartItemElement(item) {
+    var currency = getCurrency();
     var row = document.createElement('div');
     row.className = 'cart-item';
 
@@ -115,7 +136,7 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
 
     var priceEl = document.createElement('div');
     priceEl.className = 'cart-item-price';
-    priceEl.textContent = '$' + item.price.toFixed(2);
+    priceEl.textContent = '$' + item.price.toFixed(2) + ' ' + currency;
     details.appendChild(priceEl);
 
     var qtyRow = document.createElement('div');
@@ -155,9 +176,9 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
     var totalEl = document.getElementById('cart-total');
     if (!container || !totalEl) return;
 
+    var currency = getCurrency();
     var cart = getCart();
 
-    // Clear existing content
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
@@ -167,7 +188,7 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
       emptyMsg.className = 'cart-empty';
       emptyMsg.textContent = 'Your cart is empty';
       container.appendChild(emptyMsg);
-      totalEl.textContent = '$0.00 NZD';
+      totalEl.textContent = '$0.00 ' + currency;
       return;
     }
 
@@ -175,7 +196,7 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
       container.appendChild(createCartItemElement(item));
     });
 
-    totalEl.textContent = '$' + getTotal().toFixed(2) + ' NZD';
+    totalEl.textContent = '$' + getTotal().toFixed(2) + ' ' + currency;
   }
 
   function toggleDrawer(open) {
@@ -198,10 +219,12 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
     var cart = getCart();
     if (cart.length === 0) return;
 
-    fetch(CHECKOUT_URL, {
+    var currency = getCurrency();
+
+    fetch(CHECKOUT_URL + '/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: cart })
+      body: JSON.stringify({ items: cart, currency: currency })
     })
       .then(function (res) { return res.json(); })
       .then(function (data) {
@@ -263,6 +286,7 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
     getTotal: getTotal,
     getItemCount: getItemCount,
     clearCart: clearCart,
-    toggleDrawer: toggleDrawer
+    toggleDrawer: toggleDrawer,
+    getCurrency: getCurrency
   };
 })();

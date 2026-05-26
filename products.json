@@ -3,7 +3,8 @@
     "id": "vcr-tee-black",
     "name": "VCR Logo Tee",
     "description": "Classic black tee with VCR emblem",
-    "price": 45.00,
+    "priceNZD": 45.00,
+    "priceAUD": 40.00,
     "image": "images/products/vcr-tee.jpg",
     "active": true
   },
@@ -11,7 +12,8 @@
     "id": "vcr-hoodie-black",
     "name": "VCR Hoodie",
     "description": "Warm black hoodie with embroidered VCR logo",
-    "price": 75.00,
+    "priceNZD": 75.00,
+    "priceAUD": 65.00,
     "image": "images/products/vcr-hoodie.jpg",
     "active": true
   },
@@ -19,7 +21,8 @@
     "id": "vcr-sticker-pack",
     "name": "VCR Sticker Pack",
     "description": "Set of 5 die-cut VCR stickers",
-    "price": 10.00,
+    "priceNZD": 10.00,
+    "priceAUD": 8.00,
     "image": "images/products/vcr-stickers.jpg",
     "active": true
   }

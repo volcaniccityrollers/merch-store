@@ -118,6 +118,53 @@
       margin-bottom: 1rem;
     }
 
+    /* Currency Toggle */
+    .currency-section {
+      margin-bottom: 2rem;
+    }
+
+    .currency-toggle {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .currency-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid #555;
+      border-radius: 6px;
+      background: #2E2D32;
+      color: #E3CDB6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 80px;
+    }
+
+    .currency-btn.active {
+      background: #EC2026;
+      border-color: #EC2026;
+      color: #FFFFFF;
+    }
+
+    .currency-status {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #E3CDB6;
+    }
+
+    /* Form Row */
+    .form-row {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
     /* Product List */
     .product-list {
       margin-bottom: 3rem;
@@ -299,6 +346,15 @@
   <div class="admin-panel" id="adminPanel">
     <h1>VCR Merch Admin</h1>
 
+    <section class="currency-section">
+      <h2>Store Currency</h2>
+      <div class="currency-toggle">
+        <button class="currency-btn" id="btnNZD" data-currency="NZD">NZD</button>
+        <button class="currency-btn" id="btnAUD" data-currency="AUD">AUD</button>
+      </div>
+      <p class="currency-status" id="currencyStatus"></p>
+    </section>
+
     <section class="product-list">
       <h2>Products</h2>
       <div id="productListContainer">
@@ -313,9 +369,15 @@
           <label for="productName">Name</label>
           <input type="text" id="productName" required>
         </div>
-        <div class="form-group">
-          <label for="productPrice">Price ($)</label>
-          <input type="number" id="productPrice" step="0.01" min="0" required>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productPriceNZD">Price NZD ($)</label>
+            <input type="number" id="productPriceNZD" step="0.01" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="productPriceAUD">Price AUD ($)</label>
+            <input type="number" id="productPriceAUD" step="0.01" min="0" required>
+          </div>
         </div>
         <div class="form-group">
           <label for="productDescription">Description</label>
@@ -323,7 +385,7 @@
         </div>
         <div class="form-group">
           <label for="productImage">Image URL</label>
-          <input type="text" id="productImage" placeholder="e.g. images/products/item.jpg" required>
+          <input type="text" id="productImage" placeholder="e.g. images/products/item.jpg">
         </div>
         <button type="submit" id="addProductBtn">Add Product</button>
         <p class="error-message" id="addProductError"></p>

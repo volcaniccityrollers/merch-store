@@ -2,6 +2,7 @@
   'use strict';
 
   var toastTimeout = null;
+  var storeCurrency = 'NZD';
 
   function showToast(message) {
     var toast = document.getElementById('toast');
@@ -16,11 +17,16 @@
     }, 2500);
   }
 
+  function getPrice(product) {
+    return storeCurrency === 'AUD' ? product.priceAUD : product.priceNZD;
+  }
+
   function renderProductCard(product) {
     var card = document.createElement('div');
     card.className = 'product-card';
     card.setAttribute('data-product-id', product.id);
 
+    var price = getPrice(product);
     var imageHtml = product.image
       ? '<img src="' + product.image + '" alt="' + product.name + '">'
       : '<div class="product-image-placeholder"></div>';
@@ -30,21 +36,26 @@
       '<div class="card-body">' +
       '<div class="product-name">' + product.name + '</div>' +
       '<div class="product-description">' + product.description + '</div>' +
-      '<div class="product-price">$' + product.price.toFixed(2) + ' NZD</div>' +
+      '<div class="product-price">$' + price.toFixed(2) + ' ' + storeCurrency + '</div>' +
       '<button class="btn-primary add-to-cart">Add to Cart</button>' +
       '</div>';
 
     var addBtn = card.querySelector('.add-to-cart');
     addBtn.addEventListener('click', function () {
-      window.cart.addItem(product);
+      window.cart.addItem(product, storeCurrency);
       showToast(product.name + ' added to cart');
     });
 
     return card;
   }
 
-  function loadProducts() {
-    fetch('products.json')
+  function loadStore() {
+    fetch('config.json?t=' + Date.now())
+      .then(function (res) { return res.json(); })
+      .then(function (config) {
+        storeCurrency = config.currency || 'NZD';
+        return fetch('products.json?t=' + Date.now());
+      })
       .then(function (res) { return res.json(); })
       .then(function (products) {
         var grid = document.getElementById('product-grid');
@@ -57,9 +68,9 @@
           });
       })
       .catch(function (err) {
-        console.error('Failed to load products:', err);
+        console.error('Failed to load store:', err);
       });
   }
 
-  document.addEventListener('DOMContentLoaded', loadProducts);
+  document.addEventListener('DOMContentLoaded', loadStore);
 })();
