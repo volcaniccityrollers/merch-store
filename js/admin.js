@@ -1,5 +1,18 @@
 const ADMIN_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.net/merch-checkout';
 
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      // Strip the data:image/...;base64, prefix
+      resolve(result.split(',')[1]);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 const passcodeGate = document.getElementById('passcodeGate');
 const passcodeForm = document.getElementById('passcodeForm');
 const passcodeInput = document.getElementById('passcodeInput');
@@ -211,14 +224,48 @@ addProductForm.addEventListener('submit', async (e) => {
   const priceNZD = parseFloat(document.getElementById('productPriceNZD').value);
   const priceAUD = parseFloat(document.getElementById('productPriceAUD').value);
   const description = document.getElementById('productDescription').value.trim();
-  const image = document.getElementById('productImage').value.trim();
+  const imageInput = document.getElementById('productImage');
 
   if (!name || isNaN(priceNZD) || isNaN(priceAUD) || !description) {
     addProductError.textContent = 'Please fill in all required fields.';
     return;
   }
 
-  const productData = { name, priceNZD, priceAUD, description, image: image || '', active: true };
+  let imageUrl = '';
+
+  // Upload image if one was selected
+  if (imageInput.files && imageInput.files[0]) {
+    const file = imageInput.files[0];
+    const ext = file.name.split('.').pop().toLowerCase();
+    const filename = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.' + ext;
+
+    try {
+      const base64 = await fileToBase64(file);
+      const uploadRes = await fetch(ADMIN_URL + '/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Passcode': passcode
+        },
+        body: JSON.stringify({
+          filename: filename,
+          data: base64,
+          contentType: file.type
+        })
+      });
+
+      if (!uploadRes.ok) throw new Error('Failed to upload image');
+      const uploadData = await uploadRes.json();
+      imageUrl = uploadData.url;
+    } catch (err) {
+      addProductError.textContent = 'Image upload failed: ' + err.message;
+      addProductBtn.disabled = false;
+      addProductBtn.textContent = 'Add Product';
+      return;
+    }
+  }
+
+  const productData = { name, priceNZD, priceAUD, description, image: imageUrl, active: true };
 
   const passcode = sessionStorage.getItem('adminPasscode');
   addProductBtn.disabled = true;
