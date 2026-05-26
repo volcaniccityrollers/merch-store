@@ -229,12 +229,16 @@ const CHECKOUT_URL = 'https://australia-southeast1-vcr-tooling.cloudfunctions.ne
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (data.url) {
-          clearCart();
           window.location.href = data.url;
         }
       })
-      .catch(function (err) {
-        console.error('Checkout error:', err);
+      .catch(function () {
+        var toast = document.getElementById('toast');
+        if (toast) {
+          toast.textContent = 'Checkout failed. Please try again.';
+          toast.classList.add('show');
+          setTimeout(function () { toast.classList.remove('show'); }, 3000);
+        }
       });
   }
 

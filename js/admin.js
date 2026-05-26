@@ -231,6 +231,10 @@ addProductForm.addEventListener('submit', async (e) => {
     return;
   }
 
+  const passcode = sessionStorage.getItem('adminPasscode');
+  addProductBtn.disabled = true;
+  addProductBtn.textContent = 'Adding...';
+
   let imageUrl = '';
 
   // Upload image if one was selected
@@ -266,10 +270,6 @@ addProductForm.addEventListener('submit', async (e) => {
   }
 
   const productData = { name, priceNZD, priceAUD, description, image: imageUrl, active: true };
-
-  const passcode = sessionStorage.getItem('adminPasscode');
-  addProductBtn.disabled = true;
-  addProductBtn.textContent = 'Adding...';
 
   try {
     const res = await fetch(ADMIN_URL + '/products', {

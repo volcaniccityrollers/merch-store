@@ -27,25 +27,46 @@
     card.setAttribute('data-product-id', product.id);
 
     var price = getPrice(product);
-    var imageHtml = product.image
-      ? '<img src="' + product.image + '" alt="' + product.name + '">'
-      : '<div class="product-image-placeholder"></div>';
 
-    card.innerHTML =
-      imageHtml +
-      '<div class="card-body">' +
-      '<div class="product-name">' + product.name + '</div>' +
-      '<div class="product-description">' + product.description + '</div>' +
-      '<div class="product-price">$' + price.toFixed(2) + ' ' + storeCurrency + '</div>' +
-      '<button class="btn-primary add-to-cart">Add to Cart</button>' +
-      '</div>';
+    if (product.image) {
+      var img = document.createElement('img');
+      img.src = product.image;
+      img.alt = product.name;
+      card.appendChild(img);
+    } else {
+      var placeholder = document.createElement('div');
+      placeholder.className = 'product-image-placeholder';
+      card.appendChild(placeholder);
+    }
 
-    var addBtn = card.querySelector('.add-to-cart');
+    var body = document.createElement('div');
+    body.className = 'card-body';
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'product-name';
+    nameEl.textContent = product.name;
+    body.appendChild(nameEl);
+
+    var descEl = document.createElement('div');
+    descEl.className = 'product-description';
+    descEl.textContent = product.description;
+    body.appendChild(descEl);
+
+    var priceEl = document.createElement('div');
+    priceEl.className = 'product-price';
+    priceEl.textContent = '$' + price.toFixed(2) + ' ' + storeCurrency;
+    body.appendChild(priceEl);
+
+    var addBtn = document.createElement('button');
+    addBtn.className = 'btn-primary add-to-cart';
+    addBtn.textContent = 'Add to Cart';
     addBtn.addEventListener('click', function () {
       window.cart.addItem(product, storeCurrency);
       showToast(product.name + ' added to cart');
     });
+    body.appendChild(addBtn);
 
+    card.appendChild(body);
     return card;
   }
 
