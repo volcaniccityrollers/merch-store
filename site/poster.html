@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>VCR Poster Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Beachwood';
+      src: url('fonts/beachwood.otf') format('opentype');
+    }
+
+    :root {
+      --red: #EC2026;
+      --dark: #1C1C1C;
+      --sand: #E3CDB6;
+      --orange: #F16123;
+      --teal: #1998BF;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0a0a0a;
+      font-family: 'Montserrat', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ═══════════════════════════════════════
+       CONTROLS
+    ═══════════════════════════════════════ */
+    .controls {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .controls-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .controls-header h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    .controls-header span {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--red);
+      background: rgba(236, 32, 38, 0.1);
+      padding: 4px 10px;
+      border-radius: 3px;
+      border: 1px solid rgba(236, 32, 38, 0.3);
+    }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--sand);
+      margin-bottom: 5px;
+      opacity: 0.7;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: 'Montserrat', sans-serif;
+      background: rgba(255,255,255,0.04);
+      color: #fff;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus { outline: none; border-color: var(--red); }
+    .field input::placeholder { color: rgba(255,255,255,0.25); }
+
+    .generate-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: transform 0.15s, background 0.2s;
+    }
+
+    .generate-btn:hover { background: #d41a1f; transform: translateY(-1px); }
+    .generate-btn:active { transform: translateY(0); }
+
+    .presets { display: flex; gap: 8px; margin-top: 16px; }
+
+    .preset-btn {
+      flex: 1;
+      padding: 9px 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'Montserrat', sans-serif;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      color: #fff;
+      border-color: var(--red);
+      background: rgba(236, 32, 38, 0.08);
+    }
+
+    .print-note {
+      text-align: center;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      margin-top: 20px;
+    }
+
+    /* ═══════════════════════════════════════
+       PRINT PAGE — 2x A5 on landscape A4
+    ═══════════════════════════════════════ */
+    .print-page {
+      width: 297mm;
+      height: 210mm;
+      margin: 40px auto;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      padding: 3mm;
+      gap: 3mm;
+      background: #fff;
+    }
+
+    /* ═══════════════════════════════════════
+       INDIVIDUAL POSTER (A5 portrait)
+    ═══════════════════════════════════════ */
+    .poster {
+      width: calc(50% - 1.5mm);
+      height: 100%;
+      background: #FFFFFF;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 0.3mm dashed #bbb;
+    }
+
+    /* === Angled red accent strip at top === */
+    .poster-accent {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 28mm;
+      background: var(--red);
+      clip-path: polygon(0 0, 100% 0, 100% 60%, 0 100%);
+      z-index: 0;
+    }
+
+    /* === Logo sits on the red === */
+    .poster-logo-wrap {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      padding-top: 5mm;
+    }
+
+    .poster-logo {
+      width: 14mm;
+      height: auto;
+    }
+
+    /* === Main content === */
+    .poster-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      padding: 4mm 8mm 6mm;
+    }
+
+    .poster-heading {
+      font-family: 'Beachwood', 'Bebas Neue', sans-serif;
+      font-size: 20mm;
+      color: var(--dark);
+      text-transform: uppercase;
+      letter-spacing: 2mm;
+      line-height: 0.85;
+      text-align: center;
+      margin-top: 10mm;
+      margin-bottom: 1.5mm;
+    }
+
+    .poster-subheading {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.5mm;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.8mm;
+      color: rgba(28, 28, 28, 0.35);
+      margin-bottom: 6mm;
+    }
+
+    /* === QR block === */
+    .poster-qr-wrapper {
+      position: relative;
+      padding: 3mm;
+      background: none;
+      border: 0.6mm solid var(--dark);
+      border-radius: 2.5mm;
+      margin-bottom: 5mm;
+    }
+
+    .poster-qr {
+      width: 42mm;
+      height: 42mm;
+      background: #fff;
+      border-radius: 1.5mm;
+      overflow: hidden;
+    }
+
+    .poster-qr canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+
+    /* Scan indicator dots */
+    .poster-qr-wrapper::before,
+    .poster-qr-wrapper::after {
+      content: '';
+      position: absolute;
+      width: 2mm;
+      height: 2mm;
+      background: var(--red);
+      border-radius: 50%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .poster-qr-wrapper::before { left: -4.5mm; }
+    .poster-qr-wrapper::after { right: -4.5mm; }
+
+    /* === Price === */
+    .poster-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 14mm;
+      color: var(--red);
+      letter-spacing: 0.3mm;
+      margin-bottom: 1mm;
+      line-height: 1;
+    }
+
+    .poster-price:empty { display: none; }
+
+    /* === CTA === */
+    .poster-cta {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 7.5mm;
+      color: var(--dark);
+      letter-spacing: 1mm;
+      text-transform: uppercase;
+    }
+
+    .poster-divider {
+      width: 16mm;
+      height: 0.5mm;
+      background: var(--red);
+      margin: 2.5mm 0;
+      border-radius: 1mm;
+    }
+
+    .poster-tagline {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.2mm;
+      color: rgba(28, 28, 28, 0.45);
+      letter-spacing: 0.2mm;
+      text-align: center;
+      max-width: 75mm;
+      line-height: 1.5;
+    }
+
+    .poster-tagline:empty { display: none; }
+
+    /* === Footer === */
+    .poster-footer {
+      position: relative;
+      z-index: 1;
+      background: var(--dark);
+      padding: 3mm 8mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .poster-url {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.5mm;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.8mm;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════════════════
+       PRINT
+    ═══════════════════════════════════════ */
+    @media print {
+      .controls, .print-note { display: none; }
+      body { background: none; padding: 0; margin: 0; }
+      .print-page { margin: 0; box-shadow: none; }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+    }
+
+    @media screen {
+      .print-page {
+        box-shadow:
+          0 4px 6px rgba(0,0,0,0.4),
+          0 24px 80px rgba(0,0,0,0.6);
+        border-radius: 2px;
+        margin-bottom: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="controls-header">
+      <h2>Poster Generator</h2>
+      <span>VCR</span>
+    </div>
+
+    <div class="field">
+      <label>QR Link</label>
+      <input type="text" id="inputUrl" placeholder="https://...">
+    </div>
+
+    <div class="field">
+      <label>Heading</label>
+      <input type="text" id="inputHeading" placeholder="e.g. Merch, Donate, Entry">
+    </div>
+
+    <div class="field">
+      <label>Subheading</label>
+      <input type="text" id="inputSubheading" placeholder="e.g. Volcanic City Rollers">
+    </div>
+
+    <div class="field">
+      <label>Call to Action</label>
+      <input type="text" id="inputCta" placeholder="e.g. Scan to Shop">
+    </div>
+
+    <div class="field">
+      <label>Price (optional)</label>
+      <input type="text" id="inputPrice" placeholder="e.g. $10">
+    </div>
+
+    <div class="field">
+      <label>Tagline (optional)</label>
+      <input type="text" id="inputTagline" placeholder="e.g. Browse, add to cart, pay by card">
+    </div>
+
+    <button class="generate-btn" onclick="generatePoster()">Generate Poster</button>
+
+    <div class="presets">
+      <button class="preset-btn" onclick="loadPreset('merch')">Merch Store</button>
+      <button class="preset-btn" onclick="loadPreset('entry')">Event Entry</button>
+      <button class="preset-btn" onclick="loadPreset('pay')">Pay</button>
+    </div>
+
+    <p class="print-note">Cmd+P to print — landscape A4, cut along dashed lines</p>
+  </div>
+
+  <!-- Print Page — 2x A5 on landscape A4 -->
+  <div class="print-page">
+    <div class="poster" id="poster">
+      <div class="poster-accent"></div>
+      <div class="poster-logo-wrap">
+        <img class="poster-logo" src="images/logo.png" alt="VCR">
+      </div>
+      <div class="poster-content">
+        <div class="poster-heading" id="posterHeading">Merch</div>
+        <div class="poster-subheading" id="posterSubheading">Volcanic City Rollers</div>
+        <div class="poster-qr-wrapper">
+          <div class="poster-qr">
+            <canvas id="qrCanvas"></canvas>
+          </div>
+        </div>
+        <div class="poster-price" id="posterPrice"></div>
+        <div class="poster-cta" id="posterCta">Scan to Shop</div>
+        <div class="poster-divider"></div>
+        <div class="poster-tagline" id="posterTagline">Browse, add to cart, pay by card — pick up at the table</div>
+      </div>
+      <div class="poster-footer">
+        <div class="poster-url" id="posterUrl">shop.volcaniccityrollers.co.nz</div>
+      </div>
+    </div>
+
+    <div class="poster" id="poster2">
+      <div class="poster-accent"></div>
+      <div class="poster-logo-wrap">
+        <img class="poster-logo" src="images/logo.png" alt="VCR">
+      </div>
+      <div class="poster-content">
+        <div class="poster-heading" id="posterHeading2">Merch</div>
+        <div class="poster-subheading" id="posterSubheading2">Volcanic City Rollers</div>
+        <div class="poster-qr-wrapper">
+          <div class="poster-qr">
+            <canvas id="qrCanvas2"></canvas>
+          </div>
+        </div>
+        <div class="poster-price" id="posterPrice2"></div>
+        <div class="poster-cta" id="posterCta2">Scan to Shop</div>
+        <div class="poster-divider"></div>
+        <div class="poster-tagline" id="posterTagline2">Browse, add to cart, pay by card — pick up at the table</div>
+      </div>
+      <div class="poster-footer">
+        <div class="poster-url" id="posterUrl2">shop.volcaniccityrollers.co.nz</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    var presets = {
+      merch: {
+        url: 'https://shop.volcaniccityrollers.co.nz',
+        heading: 'Merch',
+        subheading: 'Volcanic City Rollers',
+        price: '',
+        cta: 'Scan to Pay',
+        tagline: ''
+      },
+      entry: {
+        url: 'https://buy.stripe.com/cNi6oA7FG0FMcpN5uY9sk00',
+        heading: 'Entry',
+        subheading: 'Volcanic City Rollers',
+        price: '',
+        cta: 'Scan to Pay',
+        tagline: 'Pay entry with your phone — fast and contactless'
+      },
+      pay: {
+        url: 'https://buy.stripe.com/14A4gs8JKdsy3Thf5y9sk06',
+        heading: 'Pay',
+        subheading: 'Volcanic City Rollers',
+        price: '',
+        cta: 'Scan to Pay',
+        tagline: 'Choose your amount'
+      }
+    };
+
+    function loadPreset(name) {
+      var p = presets[name];
+      document.getElementById('inputUrl').value = p.url;
+      document.getElementById('inputHeading').value = p.heading;
+      document.getElementById('inputSubheading').value = p.subheading;
+      document.getElementById('inputPrice').value = p.price;
+      document.getElementById('inputCta').value = p.cta;
+      document.getElementById('inputTagline').value = p.tagline;
+      generatePoster();
+    }
+
+    function generatePoster() {
+      var url = document.getElementById('inputUrl').value.trim();
+      var heading = document.getElementById('inputHeading').value.trim();
+      var subheading = document.getElementById('inputSubheading').value.trim();
+      var price = document.getElementById('inputPrice').value.trim();
+      var cta = document.getElementById('inputCta').value.trim();
+      var tagline = document.getElementById('inputTagline').value.trim();
+
+      if (!url) return;
+
+      var displayUrl = url;
+      try {
+        var parsed = new URL(url);
+        displayUrl = parsed.hostname + parsed.pathname;
+        if (displayUrl.endsWith('/')) displayUrl = displayUrl.slice(0, -1);
+      } catch (e) {}
+
+      ['', '2'].forEach(function(suffix) {
+        document.getElementById('posterHeading' + suffix).textContent = heading || 'Scan';
+        document.getElementById('posterSubheading' + suffix).textContent = subheading || '';
+        document.getElementById('posterPrice' + suffix).textContent = price || '';
+        document.getElementById('posterCta' + suffix).textContent = cta || 'Scan Me';
+        document.getElementById('posterTagline' + suffix).textContent = tagline || '';
+        document.getElementById('posterUrl' + suffix).textContent = displayUrl;
+
+        var canvas = document.getElementById('qrCanvas' + suffix);
+        QRCode.toCanvas(canvas, url, {
+          width: 300,
+          margin: 0,
+          color: { dark: '#1C1C1C', light: '#FFFFFF' },
+          errorCorrectionLevel: 'H'
+        });
+      });
+    }
+
+    loadPreset('merch');
+  </script>
+
+</body>
+</html>

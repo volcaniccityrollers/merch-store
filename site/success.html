@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#2E2D32">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <title>Order Confirmed - VCR Merch Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .order-list {
+      list-style: none;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto 2rem;
+      text-align: left;
+    }
+
+    .order-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.9rem;
+    }
+
+    .order-list li span:last-child {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a href="./" class="logo">
+      <img src="images/logo.png" alt="Volcanic City Rollers">
+    </a>
+  </header>
+
+  <div class="page-content">
+    <h1>Thanks for your purchase!</h1>
+    <p>Show this screen to the team to collect your merch</p>
+    <ul class="order-list" id="orderList"></ul>
+    <a href="./">Back to Store</a>
+  </div>
+
+  <script>
+    (function() {
+      var cart = [];
+      try {
+        cart = JSON.parse(localStorage.getItem('vcr_cart')) || [];
+      } catch (e) {}
+
+      var list = document.getElementById('orderList');
+      if (cart.length > 0) {
+        cart.forEach(function(item) {
+          var li = document.createElement('li');
+          var name = document.createElement('span');
+          name.textContent = item.name + (item.quantity > 1 ? ' x' + item.quantity : '');
+          var price = document.createElement('span');
+          price.textContent = '$' + (item.price * item.quantity).toFixed(2);
+          li.appendChild(name);
+          li.appendChild(price);
+          list.appendChild(li);
+        });
+      }
+
+      localStorage.removeItem('vcr_cart');
+    })();
+  </script>
+</body>
+</html>

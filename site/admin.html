@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <title>VCR Merch Store - Admin</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Beachwood';
+      src: url('fonts/beachwood.otf') format('opentype');
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #1C1C1C;
+      color: #FFFFFF;
+      min-height: 100vh;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Beachwood', 'Bebas Neue', sans-serif;
+    }
+
+    /* Passcode Gate */
+    .passcode-gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .passcode-gate h1 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      color: #EC2026;
+    }
+
+    .passcode-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .passcode-form input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid #E3CDB6;
+      border-radius: 6px;
+      background: #2E2D32;
+      color: #FFFFFF;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .passcode-form input:focus {
+      outline: none;
+      border-color: #EC2026;
+    }
+
+    .passcode-form button {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: #EC2026;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .passcode-form button:hover {
+      opacity: 0.9;
+    }
+
+    .passcode-error {
+      color: #EC2026;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    /* Admin Panel */
+    .admin-panel {
+      display: none;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .admin-panel h1 {
+      font-size: 2rem;
+      color: #EC2026;
+      margin-bottom: 2rem;
+    }
+
+    .admin-panel h2 {
+      font-size: 1.5rem;
+      color: #E3CDB6;
+      margin-bottom: 1rem;
+    }
+
+    /* Currency Toggle */
+    .currency-section {
+      margin-bottom: 2rem;
+    }
+
+    .currency-toggle {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .currency-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid #555;
+      border-radius: 6px;
+      background: #2E2D32;
+      color: #E3CDB6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 80px;
+    }
+
+    .currency-btn.active {
+      background: #EC2026;
+      border-color: #EC2026;
+      color: #FFFFFF;
+    }
+
+    .currency-status {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: #E3CDB6;
+    }
+
+    /* Form Row */
+    .form-row {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    /* Product List */
+    .product-list {
+      margin-bottom: 3rem;
+    }
+
+    .product-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #2E2D32;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .product-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: #1C1C1C;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    .product-info .name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .product-info .price {
+      color: #E3CDB6;
+      font-size: 0.875rem;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: #555;
+      border-radius: 26px;
+      transition: background 0.3s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      left: 3px;
+      bottom: 3px;
+      background: #FFFFFF;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: #EC2026;
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(22px);
+    }
+
+    /* Add Product Form */
+    .add-product-form {
+      background: #2E2D32;
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #E3CDB6;
+      margin-bottom: 0.25rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #555;
+      border-radius: 6px;
+      background: #1C1C1C;
+      color: #FFFFFF;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #EC2026;
+    }
+
+    .add-product-form button[type="submit"] {
+      width: 100%;
+      padding: 0.75rem;
+      background: #EC2026;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .add-product-form button[type="submit"]:hover {
+      opacity: 0.9;
+    }
+
+    .add-product-form button[type="submit"]:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Messages */
+    .loading {
+      color: #E3CDB6;
+      font-style: italic;
+      padding: 1rem 0;
+    }
+
+    .error-message {
+      color: #EC2026;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    .success-message {
+      color: #4caf50;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Passcode Gate -->
+  <div class="passcode-gate" id="passcodeGate">
+    <h1>Admin Access</h1>
+    <form class="passcode-form" id="passcodeForm">
+      <input type="password" id="passcodeInput" placeholder="Enter passcode" autocomplete="off">
+      <button type="submit">Enter</button>
+      <p class="passcode-error" id="passcodeError">Invalid passcode. Try again.</p>
+    </form>
+  </div>
+
+  <!-- Admin Panel -->
+  <div class="admin-panel" id="adminPanel">
+    <h1>VCR Merch Admin</h1>
+
+    <section class="currency-section">
+      <h2>Store Currency</h2>
+      <div class="currency-toggle">
+        <button class="currency-btn" id="btnNZD" data-currency="NZD">NZD</button>
+        <button class="currency-btn" id="btnAUD" data-currency="AUD">AUD</button>
+      </div>
+      <p class="currency-status" id="currencyStatus"></p>
+    </section>
+
+    <section class="product-list">
+      <h2>Products</h2>
+      <div id="productListContainer">
+        <p class="loading">Loading products...</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Add Product</h2>
+      <form class="add-product-form" id="addProductForm">
+        <div class="form-group">
+          <label for="productName">Name</label>
+          <input type="text" id="productName" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="productPriceNZD">Price NZD ($)</label>
+            <input type="number" id="productPriceNZD" step="0.01" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="productPriceAUD">Price AUD ($)</label>
+            <input type="number" id="productPriceAUD" step="0.01" min="0" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="productDescription">Description</label>
+          <textarea id="productDescription" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="productImage">Product Image</label>
+          <input type="file" id="productImage" accept="image/*">
+        </div>
+        <button type="submit" id="addProductBtn">Add Product</button>
+        <p class="error-message" id="addProductError"></p>
+        <p class="success-message" id="addProductSuccess"></p>
+      </form>
+    </section>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>
