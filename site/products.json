@@ -1,28 +1,37 @@
 [
   {
-    "id": "vcr-tee-black",
-    "name": "VCR Logo Tee",
-    "description": "Classic black tee with VCR emblem",
-    "priceNZD": 45,
-    "priceAUD": 40,
-    "image": "",
-    "active": false
-  },
-  {
-    "id": "vcr-hoodie-black",
-    "name": "VCR Hoodie",
-    "description": "Warm black hoodie with embroidered VCR logo",
-    "priceNZD": 75,
-    "priceAUD": 65,
+    "id": "pcr-tank",
+    "name": "PCR Tank Top",
+    "description": "Legacy Pirate City Rollers tank — the first roller derby league in the Southern Hemisphere, est. 2006. Limited remaining stock",
+    "priceNZD": 20,
+    "priceAUD": 18,
     "image": "",
     "active": true
   },
   {
-    "id": "vcr-sticker-pack",
-    "name": "VCR Sticker Pack",
-    "description": "Set of 5 die-cut VCR stickers",
-    "priceNZD": 10,
-    "priceAUD": 8,
+    "id": "ardl-tee",
+    "name": "ARDL Tee",
+    "description": "Legacy Auckland Roller Derby League tee — limited remaining stock",
+    "priceNZD": 20,
+    "priceAUD": 18,
+    "image": "",
+    "active": true
+  },
+  {
+    "id": "vcr-keychain",
+    "name": "VCR Keychain",
+    "description": "Laser-cut acrylic keychain with dark silver hardware",
+    "priceNZD": 8,
+    "priceAUD": 7,
+    "image": "",
+    "active": true
+  },
+  {
+    "id": "vcr-sticker",
+    "name": "VCR Sticker",
+    "description": "Die-cut vinyl sticker",
+    "priceNZD": 2,
+    "priceAUD": 2,
     "image": "",
     "active": true
   }
