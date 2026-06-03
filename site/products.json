@@ -4,7 +4,7 @@
     "name": "PCR Tank Top",
     "description": "Legacy Pirate City Rollers tank — the first roller derby league in the Southern Hemisphere, est. 2006. Limited remaining stock",
     "priceNZD": 20,
-    "priceAUD": 18,
+    "priceAUD": 20,
     "image": "",
     "active": true
   },
@@ -13,7 +13,7 @@
     "name": "ARDL Tee",
     "description": "Legacy Auckland Roller Derby League tee — limited remaining stock",
     "priceNZD": 20,
-    "priceAUD": 18,
+    "priceAUD": 20,
     "image": "",
     "active": true
   },
@@ -22,7 +22,7 @@
     "name": "VCR Keychain",
     "description": "Laser-cut acrylic keychain with dark silver hardware",
     "priceNZD": 8,
-    "priceAUD": 7,
+    "priceAUD": 8,
     "image": "",
     "active": true
   },
