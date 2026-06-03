@@ -23,7 +23,7 @@
     "description": "Laser-cut acrylic keychain with dark silver hardware",
     "priceNZD": 8,
     "priceAUD": 8,
-    "image": "",
+    "image": "https://storage.googleapis.com/vcr-merch-images/images/vcr-keychain.png",
     "active": true
   },
   {
@@ -32,7 +32,7 @@
     "description": "Die-cut vinyl sticker",
     "priceNZD": 2,
     "priceAUD": 2,
-    "image": "",
+    "image": "https://storage.googleapis.com/vcr-merch-images/images/vcr-sticker.png",
     "active": true
   }
 ]
