@@ -170,6 +170,20 @@ function renderProducts(products) {
 
     item.appendChild(info);
 
+    const editBtn = document.createElement('button');
+    editBtn.className = 'edit-btn';
+    editBtn.textContent = 'Edit';
+    editBtn.addEventListener('click', () => showEditForm(product));
+    item.appendChild(editBtn);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'edit-btn';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.style.borderColor = '#EC2026';
+    deleteBtn.style.color = '#EC2026';
+    deleteBtn.addEventListener('click', () => handleDelete(product));
+    item.appendChild(deleteBtn);
+
     const toggleLabel = document.createElement('label');
     toggleLabel.className = 'toggle-switch';
 
@@ -211,6 +225,149 @@ async function handleToggle(productId, active) {
   } catch (err) {
     alert('Error toggling product: ' + err.message);
     await loadProducts();
+  }
+}
+
+// Edit product
+function createInput(type, className, value) {
+  const input = document.createElement(type === 'textarea' ? 'textarea' : 'input');
+  if (type !== 'textarea') input.type = type;
+  input.className = className;
+  input.value = value;
+  if (type === 'number') { input.step = '0.01'; input.min = '0'; }
+  return input;
+}
+
+function createFormGroup(labelText, inputEl) {
+  const group = document.createElement('div');
+  group.className = 'form-group';
+  const label = document.createElement('label');
+  label.textContent = labelText;
+  group.appendChild(label);
+  group.appendChild(inputEl);
+  return group;
+}
+
+function showEditForm(product) {
+  const existing = document.querySelector('.product-edit-form');
+  if (existing) existing.remove();
+
+  const form = document.createElement('div');
+  form.className = 'product-edit-form';
+
+  const nameInput = createInput('text', 'edit-name', product.name);
+  form.appendChild(createFormGroup('Name', nameInput));
+
+  const priceRow = document.createElement('div');
+  priceRow.className = 'form-row';
+  const nzdInput = createInput('number', 'edit-priceNZD', product.priceNZD);
+  const audInput = createInput('number', 'edit-priceAUD', product.priceAUD);
+  priceRow.appendChild(createFormGroup('Price NZD ($)', nzdInput));
+  priceRow.appendChild(createFormGroup('Price AUD ($)', audInput));
+  form.appendChild(priceRow);
+
+  const descInput = createInput('textarea', 'edit-description', product.description);
+  form.appendChild(createFormGroup('Description', descInput));
+
+  const actions = document.createElement('div');
+  actions.className = 'edit-actions';
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'save-btn';
+  saveBtn.textContent = 'Save';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'cancel-btn';
+  cancelBtn.textContent = 'Cancel';
+  actions.appendChild(saveBtn);
+  actions.appendChild(cancelBtn);
+  form.appendChild(actions);
+
+  const errorEl = document.createElement('p');
+  errorEl.className = 'error-message edit-error';
+  form.appendChild(errorEl);
+
+  // Insert after the product item
+  const items = productListContainer.querySelectorAll('.product-item');
+  let targetItem = null;
+  items.forEach((item) => {
+    const nameEl = item.querySelector('.name');
+    if (nameEl && nameEl.textContent === product.name) targetItem = item;
+  });
+
+  if (targetItem) {
+    targetItem.after(form);
+  } else {
+    productListContainer.appendChild(form);
+  }
+
+  saveBtn.addEventListener('click', () => handleEdit(product.id, form));
+  cancelBtn.addEventListener('click', () => form.remove());
+}
+
+async function handleEdit(productId, form) {
+  const passcode = sessionStorage.getItem('adminPasscode');
+  const errorEl = form.querySelector('.edit-error');
+  const saveBtn = form.querySelector('.save-btn');
+  errorEl.textContent = '';
+
+  const name = form.querySelector('.edit-name').value.trim();
+  const priceNZD = parseFloat(form.querySelector('.edit-priceNZD').value);
+  const priceAUD = parseFloat(form.querySelector('.edit-priceAUD').value);
+  const description = form.querySelector('.edit-description').value.trim();
+
+  if (!name || isNaN(priceNZD) || isNaN(priceAUD)) {
+    errorEl.textContent = 'Name and prices are required.';
+    return;
+  }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+
+  try {
+    const res = await fetch(ADMIN_URL + '/products/' + productId, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Passcode': passcode
+      },
+      body: JSON.stringify({ name, priceNZD, priceAUD, description })
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Failed to update product');
+    }
+
+    await loadProducts();
+  } catch (err) {
+    errorEl.textContent = err.message;
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save';
+  }
+}
+
+// Delete product
+async function handleDelete(product) {
+  if (!confirm('Delete "' + product.name + '"? This cannot be undone.')) return;
+
+  const passcode = sessionStorage.getItem('adminPasscode');
+
+  try {
+    const res = await fetch(ADMIN_URL + '/products/' + product.id, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Passcode': passcode
+      }
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Failed to delete product');
+    }
+
+    await loadProducts();
+  } catch (err) {
+    alert('Error deleting product: ' + err.message);
   }
 }
 

@@ -312,6 +312,85 @@
       cursor: not-allowed;
     }
 
+    /* Edit Button */
+    .edit-btn {
+      padding: 0.4rem 0.75rem;
+      background: transparent;
+      border: 1px solid #E3CDB6;
+      border-radius: 4px;
+      color: #E3CDB6;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .edit-btn:hover {
+      background: #E3CDB6;
+      color: #1C1C1C;
+    }
+
+    .edit-btn[style*="border-color"]:hover {
+      background: #EC2026;
+      color: #FFFFFF;
+    }
+
+    /* Edit Form (inline) */
+    .product-edit-form {
+      background: #1C1C1C;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .product-edit-form .form-row {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .product-edit-form .form-row .form-group {
+      flex: 1;
+    }
+
+    .edit-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .edit-actions button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .edit-actions .save-btn {
+      background: #EC2026;
+      color: #FFFFFF;
+    }
+
+    .edit-actions .cancel-btn {
+      background: #555;
+      color: #FFFFFF;
+    }
+
+    .edit-actions button:hover {
+      opacity: 0.9;
+    }
+
+    .edit-actions button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     /* Messages */
     .loading {
       color: #E3CDB6;

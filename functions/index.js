@@ -25,7 +25,7 @@ function setCors(req, res) {
   if (isAllowedOrigin(origin)) {
     res.set('Access-Control-Allow-Origin', origin);
   }
-  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, OPTIONS');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type, X-Admin-Passcode');
   res.set('Access-Control-Max-Age', '3600');
 }
@@ -282,6 +282,35 @@ async function handleCreateProduct(req, res) {
   return res.status(201).json({ product: newProduct });
 }
 
+async function handleDeleteProduct(req, res, productId) {
+  if (!validateAdmin(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  let products;
+  try {
+    products = await readJSON(PRODUCTS_FILE);
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to fetch products' });
+  }
+
+  const index = products.findIndex((p) => p.id === productId);
+  if (index === -1) {
+    return res.status(404).json({ error: `Product not found: ${productId}` });
+  }
+
+  products.splice(index, 1);
+
+  try {
+    await writeJSON(PRODUCTS_FILE, products);
+  } catch (err) {
+    console.error('Failed to save products:', err.message);
+    return res.status(500).json({ error: 'Failed to delete product' });
+  }
+
+  return res.status(200).json({ deleted: true });
+}
+
 async function handleUpdateProduct(req, res, productId) {
   if (req.method !== 'PATCH') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -291,9 +320,16 @@ async function handleUpdateProduct(req, res, productId) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const { active } = req.body;
-  if (active == null) {
-    return res.status(400).json({ error: 'active field is required' });
+  const updates = req.body;
+  if (!updates || Object.keys(updates).length === 0) {
+    return res.status(400).json({ error: 'No fields to update' });
+  }
+
+  const ALLOWED_FIELDS = ['name', 'priceNZD', 'priceAUD', 'description', 'image', 'active'];
+  for (const key of Object.keys(updates)) {
+    if (!ALLOWED_FIELDS.includes(key)) {
+      return res.status(400).json({ error: `Invalid field: ${key}` });
+    }
   }
 
   let products;
@@ -308,7 +344,11 @@ async function handleUpdateProduct(req, res, productId) {
     return res.status(404).json({ error: `Product not found: ${productId}` });
   }
 
-  product.active = active;
+  for (const key of ALLOWED_FIELDS) {
+    if (updates[key] !== undefined) {
+      product[key] = updates[key];
+    }
+  }
 
   try {
     await writeJSON(PRODUCTS_FILE, products);
@@ -356,6 +396,7 @@ functions.http('merch-checkout', async (req, res) => {
 
     const productMatch = path.match(/^\/products\/([^/]+)$/);
     if (productMatch) {
+      if (req.method === 'DELETE') return await handleDeleteProduct(req, res, productMatch[1]);
       return await handleUpdateProduct(req, res, productMatch[1]);
     }
 
